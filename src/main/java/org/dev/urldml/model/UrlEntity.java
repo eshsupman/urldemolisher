@@ -3,15 +3,13 @@ package org.dev.urldml.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Table(name = "urls",indexes = {@Index( name = "token_idx",columnList = "token")})
 @Entity
+@Table(name = "urls",indexes = {@Index( name = "token_idx",columnList = "token")})
 @Data
 public class UrlEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "token", nullable = false, unique = true)
     private String token;

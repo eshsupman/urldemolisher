@@ -31,10 +31,10 @@ public class UrlService {
         LocalDateTime expiredTime = createTime.plus(urlTtl);
         long id = urlRepository.getNextSequenceValue();
         String token = toBase62(id);
+        UrlEntity savedUrl = urlRepository.save(new UrlEntity(id, leftPadWithZero(token, len), url, createTime, expiredTime));
         if (token.length() > len) {
             throw new IllegalArgumentException("required length is to small");
         }
-        UrlEntity savedUrl = urlRepository.save(new UrlEntity(id, leftPadWithZero(token, len), url, createTime, expiredTime));
         return savedUrl;
     }
 

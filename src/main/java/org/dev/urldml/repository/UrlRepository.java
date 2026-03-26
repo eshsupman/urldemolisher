@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface UrlRepository extends JpaRepository<UrlEntity, Long> {
     Optional<UrlEntity> getUrlEntityByToken(String token);
-    @Query(value = "SELECT nextval('your_sequence_name')", nativeQuery = true)
+    @Query(value = "SELECT nextval('urls_seq')", nativeQuery = true)
     Long getNextSequenceValue();
 }
