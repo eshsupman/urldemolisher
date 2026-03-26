@@ -7,6 +7,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/url_dml
       SPRING_DATASOURCE_USERNAME: postgres
@@ -21,6 +23,8 @@ services:
       POSTGRES_DB: url_dml
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1111
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
     ports:
       - "5432:5432"
     volumes:
@@ -30,6 +34,10 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-
+  redis:
+    image: redis:7-alpine
+    container_name: url-redis
+    ports:
+      - "6379:6379"
 volumes:
   postgres_data:
