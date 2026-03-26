@@ -1,5 +1,7 @@
 package org.dev.urldml.service;
 
+import org.dev.urldml.exeption.ExpiredShortUrlException;
+import org.dev.urldml.exeption.NotFoundException;
 import org.dev.urldml.model.UrlEntity;
 import org.dev.urldml.repository.UrlRepository;
 import org.slf4j.Logger;
@@ -39,7 +41,8 @@ public class UrlService {
     }
 
     public String getUrl(String token)  {
-        UrlEntity url = urlRepository.getUrlEntityByToken(token).orElseThrow(() -> new RuntimeException());
+        UrlEntity url = urlRepository.getUrlEntityByToken(token).orElseThrow(() -> new NotFoundException("cant find url mapped to this token"));
+        if(url.getExpiredAt().isAfter(LocalDateTime.now())) throw new ExpiredShortUrlException("token mapped to this url was expired");
         return url.getUrl();
     }
 
