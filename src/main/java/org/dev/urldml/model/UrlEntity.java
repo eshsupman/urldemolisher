@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Table(name = "urls",indexes = {@Index( name = "token_idx",columnList = "token")})
 @Entity
@@ -11,23 +12,23 @@ import java.time.LocalDate;
 public class UrlEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
     @Column(name = "token", nullable = false, unique = true)
-    String token;
-    @Column(name = "url", nullable = false, unique = true, columnDefinition = "TEXT")
+    private String token;
+    @Column(name = "url", nullable = false, columnDefinition = "TEXT")
     private String url;
-    @Column(name = "created_at")
-    private LocalDate createdAt;
-    @Column(name = "expired_at")
-    private LocalDate expiredAt;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+    @Column(name = "expired_at", nullable = false)
+    private LocalDateTime expiredAt;
 
 
-    public UrlEntity(Long id,String token, String url, LocalDate createdAt) {
+    public UrlEntity(Long id, String token, String url, LocalDateTime createdAt, LocalDateTime expiredAt) {
         this.id = id;
         this.token = token;
         this.url = url;
         this.createdAt = createdAt;
-        this.expiredAt = createdAt.plusMonths(1);
+        this.expiredAt = createdAt;
     }
 
     public UrlEntity() {
