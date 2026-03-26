@@ -1,4 +1,4 @@
-package org.dev.urldml.DTO;
+package org.dev.urldml.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

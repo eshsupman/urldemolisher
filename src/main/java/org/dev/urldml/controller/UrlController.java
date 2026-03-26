@@ -1,8 +1,8 @@
 package org.dev.urldml.controller;
 
 import jakarta.validation.Valid;
-import org.dev.urldml.DTO.InsertUrlRequest;
-import org.dev.urldml.DTO.InsertUrlResponse;
+import org.dev.urldml.dto.InsertUrlRequest;
+import org.dev.urldml.dto.InsertUrlResponse;
 import org.dev.urldml.model.UrlEntity;
 import org.dev.urldml.service.UrlService;
 import org.slf4j.Logger;
