@@ -2,6 +2,8 @@ package org.dev.urldml.exeption;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -15,14 +17,17 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFound(NotFoundException ex, HttpServletRequest request) {
+        log.warn("Not found exception: {}", ex.getMessage());
         return buildError(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(ExpiredShortUrlException.class)
     public ResponseEntity<Map<String, Object>> handleExpired(ExpiredShortUrlException ex, HttpServletRequest request) {
+        log.warn("Expired link access: {}", ex.getMessage());
         return buildError(HttpStatus.GONE, ex.getMessage(), request.getRequestURI());
     }
 
@@ -33,6 +38,7 @@ public class GlobalExceptionHandler {
             FieldError firstError = methodEx.getBindingResult().getFieldErrors().get(0);
             message = firstError.getField() + ": " + firstError.getDefaultMessage();
         }
+        log.warn("Bad request: {}", message);
         return buildError(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
     }
 

@@ -24,18 +24,21 @@ public class UrlController {
 
     @PostMapping("/api/urls")
     public ResponseEntity<InsertUrlResponse> createShortUrl(@Valid @RequestBody InsertUrlRequest insertUrlRequest){
-        log.info("request {}", insertUrlRequest);
+        log.info("Received request to create short URL: {}", insertUrlRequest);
         UrlEntity createdUrl = urlService.create(insertUrlRequest.getUrl(),insertUrlRequest.getLen());
         String token = createdUrl.getToken();
         String originalUrl = createdUrl.getUrl();
         String shortUrl = "/" + token;
+        log.info("Successfully created short URL: token={}, originalUrl={}", token, originalUrl);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new InsertUrlResponse(token,shortUrl, originalUrl));
     }
 
     @GetMapping("/{token}")
     public ResponseEntity<Void> redirect(@PathVariable String token){
+        log.info("Received redirect request for token: {}", token);
         String foundedUrl = urlService.getUrl(token);
+        log.info("Redirecting token {} to URL: {}", token, foundedUrl);
         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(foundedUrl)).build();
 
     }

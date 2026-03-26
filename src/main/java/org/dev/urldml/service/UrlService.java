@@ -23,26 +23,40 @@ public class UrlService {
     Duration urlTtl) {
         this.urlRepository = urlRepository;
         if (urlTtl.isNegative() || urlTtl.isZero()) {
+            log.error("Invalid URL TTL configuration: {}", urlTtl);
             throw new IllegalArgumentException("url ttl must be a positive integer");
         }
         this.urlTtl = urlTtl;
+        log.info("UrlService initialized with TTL: {}", urlTtl);
     }
 
     public UrlEntity create(String url, int len) {
+        log.debug("Creating short URL for: {}, requested length: {}", url, len);
         LocalDateTime createTime = LocalDateTime.now();
         LocalDateTime expiredTime = createTime.plus(urlTtl);
         long id = urlRepository.getNextSequenceValue();
         String token = toBase62(id);
-        UrlEntity savedUrl = urlRepository.save(new UrlEntity(id, leftPadWithZero(token, len), url, createTime, expiredTime));
         if (token.length() > len) {
+            log.warn("Generated token length {} exceeds requested length {} for id {}",
+                    token.length(), len, id);
             throw new IllegalArgumentException("required length is to small");
         }
+        UrlEntity savedUrl = urlRepository.save(new UrlEntity(id, leftPadWithZero(token, len), url, createTime, expiredTime));
+        log.info("Created short URL: {}", savedUrl);
         return savedUrl;
     }
 
-    public String getUrl(String token)  {
-        UrlEntity url = urlRepository.getUrlEntityByToken(token).orElseThrow(() -> new NotFoundException("cant find url mapped to this token"));
-        if(url.getExpiredAt().isAfter(LocalDateTime.now())) throw new ExpiredShortUrlException("token mapped to this url was expired");
+    public String getUrl(String token) {
+        log.debug("Looking up URL for token: {}", token);
+        UrlEntity url = urlRepository.getUrlEntityByToken(token).orElseThrow(() -> {
+            log.warn("Token not found: {}", token);
+            return new NotFoundException("cant find url mapped to this token");
+        });
+        if (url.getExpiredAt().isAfter(LocalDateTime.now())) {
+            log.warn("Expired token accessed: {}, expired at {}", token, url.getExpiredAt());
+            throw new ExpiredShortUrlException("token mapped to this url was expired");
+        }
+        log.debug("Resolved token {} to URL: {}", token, url.getUrl());
         return url.getUrl();
     }
 
