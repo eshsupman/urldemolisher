@@ -47,15 +47,15 @@ public class UrlService {
         }
         UrlEntity savedUrl = urlRepository.save(new UrlEntity(id, leftPadWithZero(token, len), url, createTime, expiredTime));
         cacheUrl(savedUrl.getToken(), savedUrl.getUrl(), createTime, expiredTime);
-        log.info("Created short URL: {}", savedUrl);
+        log.debug("Created short URL: {}", savedUrl);
         return savedUrl;
     }
 
     public String getUrl(String token) {
-        log.info("Looking up URL for token: {}", token);
+        log.debug("Looking up URL for token: {}", token);
         String cachedUrl = redisTemplate.opsForValue().get(token);
         if (cachedUrl != null) {
-            log.info("Cache hit for token: {}", token);
+            log.debug("Cache hit for token: {}", token);
             return cachedUrl;
         }
         UrlEntity url = urlRepository.getUrlEntityByToken(token).orElseThrow(() -> {
@@ -64,10 +64,10 @@ public class UrlService {
         });
         if (url.getExpiredAt().isAfter(LocalDateTime.now())) {
             log.warn("Expired token accessed: {}, expired at {}", token, url.getExpiredAt());
-            throw new ExpiredShortUrlException("token mapped to this url was expired");
+            throw new ExpiredShortUrlException("token was expired");
         }
         cacheUrl(token, url.getUrl(), LocalDateTime.now(), url.getExpiredAt());
-        log.info("Resolved token {} to URL: {}", token, url.getUrl());
+        log.debug("Resolved token {} to URL: {}", token, url.getUrl());
         return url.getUrl();
     }
 
