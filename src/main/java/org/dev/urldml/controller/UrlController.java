@@ -34,7 +34,7 @@ public class UrlController {
                 .body(new InsertUrlResponse(token,shortUrl, originalUrl));
     }
 
-    @GetMapping("/{token}")
+    @GetMapping("/{token:^[a-zA-Z0-9]+$}")
     public ResponseEntity<Void> redirect(@PathVariable String token){
         log.info("Received redirect request for token: {}", token);
         String foundedUrl = urlService.getUrl(token);

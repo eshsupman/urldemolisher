@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сокращатель ссылок</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e7f3fe;
+            border-left: 4px solid #2196F3;
+            word-break: break-all;
+        }
+        .error {
+            background-color: #ffe7e7;
+            border-left-color: #f44336;
+        }
+        .hidden {
+            display: none;
+        }
+        .copy-btn {
+            background-color: #008CBA;
+            margin-top: 10px;
+        }
+        .copy-btn:hover {
+            background-color: #0077a3;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Сокращатель ссылок</h1>
+    <form id="shortenForm">
+        <label for="url">Длинная ссылка:</label>
+        <input type="url" id="url" name="url" placeholder="https://example.com/very/long/url" required>
+
+        <label for="len">Длина токена (от 4 до 16):</label>
+        <input type="number" id="len" name="len" min="4" max="16" value="6" required>
+
+        <button type="submit">Сократить</button>
+    </form>
+
+    <div id="result" class="result hidden"></div>
+</div>
+
+<script>
+    const form = document.getElementById('shortenForm');
+    const resultDiv = document.getElementById('result');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const url = document.getElementById('url').value.trim();
+        let len = parseInt(document.getElementById('len').value, 10);
+
+        // Валидация
+        if (!url) {
+            showError('Введите URL');
+            return;
+        }
+        if (isNaN(len) || len < 4 || len > 16) {
+            showError('Длина токена должна быть от 4 до 16');
+            return;
+        }
+
+        // Скрываем предыдущий результат
+        resultDiv.classList.add('hidden');
+        resultDiv.textContent = '';
+
+        try {
+            const response = await fetch('/api/urls', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url, len })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Ошибка сервера');
+            }
+
+            const data = await response.json();
+            const shortUrl = data.shortUrl;
+
+            // Формируем полный URL (абсолютный)
+            const fullShortUrl = window.location.origin + shortUrl;
+
+            resultDiv.innerHTML = `
+                <strong>Короткая ссылка:</strong><br>
+                <a href="${fullShortUrl}" target="_blank">${fullShortUrl}</a><br>
+                <button class="copy-btn" onclick="copyToClipboard('${fullShortUrl}')">Скопировать</button>
+            `;
+            resultDiv.classList.remove('hidden');
+            resultDiv.classList.remove('error');
+        } catch (error) {
+            showError(error.message);
+        }
+    });
+
+    function showError(message) {
+        resultDiv.innerHTML = `<strong>Ошибка:</strong> ${message}`;
+        resultDiv.classList.remove('hidden');
+        resultDiv.classList.add('error');
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Ссылка скопирована!');
+        }).catch(() => {
+            alert('Не удалось скопировать');
+        });
+    }
+</script>
+</body>
+</html>
