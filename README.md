@@ -9,10 +9,11 @@
 - PostgreSQL
 - Redis
 - Gradle
+- nginx
 
 ## Быстрый старт
 
-1. Поднять приложение + PostgreSQL + Redis:
+1. Поднять приложение + PostgreSQL + Redis + nginx:
 
 ```bash
 docker compose up -d
@@ -24,11 +25,11 @@ docker compose up -d
 docker compose logs -f app
 ```
 
-Приложение стартует на `http://localhost:8080`.
+Приложение будет доступно по адресу http://localhost (nginx проксирует на порт 8080).
 
 ## Docker
 
-Поднять весь стек (app + postgres + redis):
+Поднять весь стек (app + postgres + redis + nginx):
 
 ```bash
 docker compose up -d --build
@@ -77,7 +78,10 @@ docker compose down
 Возвращает `302 Found` с заголовком `Location` на оригинальный URL.  
 Если срок жизни ссылки истек, сервис возвращает `410 Gone`.
 
+## Фоновая очистка ##
+Просроченные ссылки удаляются из PostgreSQL каждое первое число месяца в 00:00.
 
+Задача выполняется с помощью @Scheduled. При нескольких экземплярах используется ShedLock для предотвращения дублирования.
 ## Переменные окружения
 
 - `SERVER_PORT` (default: `8080`)
