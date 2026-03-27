@@ -39,5 +39,13 @@ services:
     container_name: url-redis
     ports:
       - "6379:6379"
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
 volumes:
   postgres_data:
